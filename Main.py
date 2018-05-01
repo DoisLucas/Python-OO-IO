@@ -9,15 +9,15 @@ lista_carros = []
 lista_pessoa = []
 lista_venda = []
 
-# usuario = getpass.getuser()
+usuario = getpass.getuser()
 
-filepath = os.path.join('C:\\Users\\plocabral\\Desktop\\', 'database.db')
+filepath = os.path.join('C:\\Users\\'+usuario+'\\Desktop\\', 'database.db')
 
 fileEscrita = open(filepath, "a+")
 fileLeitura = open(filepath, "r+")
 
-if not os.path.exists('C:\\Users\\plocabral\\Desktop\\'):
-    os.makedirs('C:\\Users\\plocabral\\Desktop\\')
+if not os.path.exists('C:\\Users\\'+usuario+'\\Desktop\\'):
+    os.makedirs('C:\\Users\\'+usuario+'\\Desktop\\')
 
 
 def menu():
@@ -102,7 +102,6 @@ def menu():
 
                 for line in lines:
                     if (numero_chassi == int(line.split(";")[1]) and line.split(";")[0] == "carro"):
-                        # print("entrou", line)
                         linha_remove = line
 
                 linha_dependeces = None
@@ -116,15 +115,11 @@ def menu():
 
             if (not linha_dependeces == None):
                 for line in lines:
-                    # print(linha_remove, line)
                     if (not line.__eq__(linha_remove) and not line.__eq__(linha_dependeces)):
-                        # print("entrou n igual")
                         line_entra.append(line)
             else:
                 for line in lines:
-                    # print(linha_remove, line)
                     if (not line.__eq__(linha_remove)):
-                        # print("entrou n igual")
                         line_entra.append(line)
 
             open(filepath, 'w').close()
@@ -231,7 +226,6 @@ def menu():
 
                 for line in lines:
                     if (cpf == line.split(";")[1] and line.split(";")[0] == "pessoa"):
-                        # print("entrou", line)
                         linha_remove = line
 
                 linha_dependeces = []
