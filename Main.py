@@ -5,20 +5,24 @@ from Carro import Carro
 from Pessoa import Pessoa
 from Venda import Venda
 
+   # Autor/Author: Pedro Lucas de Oliveira Cabral
+   # GitHub: https://github.com/DoisLucas
+   # Data/Date: 04/05/2018
+
 lista_carros = []
 lista_pessoa = []
 lista_venda = []
 
+#Automatico
 usuario = getpass.getuser()
 
-filepath = os.path.join('C:\\Users\\'+usuario+'\\Desktop\\', 'database.db')
+#Manual
+usuario = 'Pichau'
+
+filepath = os.path.join('C:\\Users\\' + usuario + '\\Desktop\\', 'database.txt')
 
 fileEscrita = open(filepath, "a+")
 fileLeitura = open(filepath, "r+")
-
-if not os.path.exists('C:\\Users\\'+usuario+'\\Desktop\\'):
-    os.makedirs('C:\\Users\\'+usuario+'\\Desktop\\')
-
 
 def menu():
     print("1) Cadastrar Carro")
@@ -38,7 +42,6 @@ def menu():
     if (op == 1):
 
         pode = True
-
         numero_chassi = int(input("\nDigite o número do chassi do carro: "))
 
         for carros in lista_carros:
@@ -56,11 +59,8 @@ def menu():
             lista_carros.append(c)
             print("\nCarro adicionado com sucesso!\n")
 
-            fileEscrita = open(filepath, "a+")
-            fileEscrita.write(
-                "carro;" + str(c.numero_chassi) + ';' + c.nome + ";" + c.cor + ";" + str(c.ano) + ";" + str(
-                    c.potencia) + ";" + str(c.valor) + "\n")
-            fileEscrita.close()
+            escrever("carro;" + str(c.numero_chassi) + ';' + c.nome + ";" + c.cor + ";" + str(c.ano) + ";" + str(
+                c.potencia) + ";" + str(c.valor) + "\n")
             menu()
 
         else:
@@ -83,7 +83,6 @@ def menu():
 
         achou = False
         umavez = False;
-
         numero_chassi = int(input("\nDigite o numero do chassi para deletar o carro: "))
 
         for carro in lista_carros:
@@ -94,22 +93,22 @@ def menu():
         if (achou):
 
             linha_remove = None
-            fileLeitura = open(filepath, "r+")
-            lines = fileLeitura.readlines()
-            fileLeitura.close()
+            linha_dependeces = None
 
-            if (lines.__len__() != 0):
+            lines = getLines()
+            linha_remove = getLineObj('c', numero_chassi)
 
-                for line in lines:
-                    if (numero_chassi == int(line.split(";")[1]) and line.split(";")[0] == "carro"):
-                        linha_remove = line
+            for dependences in lines:
+                if (dependences.split(";")[0] == "venda"):
+                    if (numero_chassi == int(dependences.split(";")[2])):
+                        linha_dependeces = dependences
 
-                linha_dependeces = None
+            print(linha_dependeces)
 
-                for dependences in lines:
-                    if (dependences.split(";")[0] == "venda"):
-                        if (numero_chassi == int(dependences.split(";")[2])):
-                            linha_dependeces = dependences
+            for vendas in lista_venda:
+
+                if(linha_dependeces.split(";")[1].__eq__(str(vendas.pessoa.cpf))):
+                    lista_venda.remove(vendas)
 
             line_entra = []
 
@@ -122,12 +121,10 @@ def menu():
                     if (not line.__eq__(linha_remove)):
                         line_entra.append(line)
 
-            open(filepath, 'w').close()
+            limpar_arquivo()
 
             for line_e in line_entra:
-                fileEscrita = open(filepath, "a+")
-                fileEscrita.write(line_e)
-                fileEscrita.close()
+                escrever(line_e)
 
             print("\nCarro Deletado com Sucesso! \n")
 
@@ -147,7 +144,11 @@ def menu():
 
         if (carro_achado == None):
             print("\nCarro não existe!\n")
+            menu()
         else:
+
+            linha_remove = getLineObj('c', numero_chassi)
+
             print("\n\tAlterando carro: ", carro_achado.numero_chassi, " - ", carro_achado.nome, "\n")
             novo_nome = input("Digite o novo nome do carro: ")
             nova_cor = input("Digite a nova cor do carro: ")
@@ -159,7 +160,25 @@ def menu():
             carro_achado.cor = nova_cor
             carro_achado.ano = novo_ano
             carro_achado.potencia = nova_potencia
-            carro_achado.novo_valor = novo_valor
+            carro_achado.valor = novo_valor
+
+            linha_add = 'carro;' + str(
+                carro_achado.numero_chassi) + ';' + carro_achado.nome + ';' + carro_achado.cor + ';' + str(
+                carro_achado.ano) + ';' + str(carro_achado.potencia) + ';' + str(carro_achado.valor)
+
+            line_entra = []
+
+            for line in getLines():
+
+                if (not linha_remove == line):
+                    line_entra.append(line)
+
+            limpar_arquivo()
+
+            for line_e in line_entra:
+                escrever(line_e)
+
+            escrever(linha_add + "\n")
 
             print("\nCarro alterado com sucesso!\n")
             menu()
@@ -178,19 +197,17 @@ def menu():
             nome = input("Digite o nome da pessoa: ")
             rg = input("Digite o RG da pessoa: ")
             idade = int(input("Digite a idade da pessoa: "))
+
             p = Pessoa(cpf, rg, idade, nome)
             lista_pessoa.append(p)
+
             print("\nPessoa Cadastrada com sucesso!\n")
-
-            fileEscrita = open(filepath, "a+")
-            fileEscrita.write("pessoa;" + p.cpf + ';' + p.rg + ";" + str(p.idade) + ";" + p.nome + "\n")
-            fileEscrita.close()
+            escrever("pessoa;" + p.cpf + ';' + p.rg + ";" + str(p.idade) + ";" + p.nome + "\n")
             menu()
+
         else:
-            print("\nImpossivel cadastrar, cpf já em uso!\n")
+            print("\nImpossivel cadastrar, CPF já em uso!\n")
             menu()
-
-
 
     elif (op == 6):
 
@@ -198,7 +215,7 @@ def menu():
             print("\nLista de Pessoas (", lista_pessoa.__len__(), ")\n")
             for pessoa in lista_pessoa:
                 print("Nome: ", pessoa.nome, end="")
-                print("\nCPF: ", pessoa.cpf, "\nIdade: ", pessoa.idade, "\nRG: ", pessoa.rg,
+                print("CPF: ", pessoa.cpf, "\nIdade: ", pessoa.idade, "\nRG: ", pessoa.rg,
                       "\n")
         else:
             print("\nLista vazia\n")
@@ -217,25 +234,22 @@ def menu():
 
         if (achou):
 
-            linha_remove = None
-            fileLeitura = open(filepath, "r+")
-            lines = fileLeitura.readlines()
-            fileLeitura.close()
+            lines = getLines()
+            linha_remove = getLineObj('p', cpf)
+            linha_dependeces = []
 
-            if (lines.__len__() != 0):
-
-                for line in lines:
-                    if (cpf == line.split(";")[1] and line.split(";")[0] == "pessoa"):
-                        linha_remove = line
-
-                linha_dependeces = []
-
-                for dependences in lines:
-                    if (dependences.split(";")[0] == "venda"):
-                        if (cpf == dependences.split(";")[1]):
-                            linha_dependeces.append(dependences)
+            for dependences in lines:
+                if (dependences.split(";")[0] == "venda"):
+                    if (cpf == dependences.split(";")[1]):
+                        linha_dependeces.append(dependences)
 
             linha_dependeces.append(linha_remove)
+
+            for dep in linha_dependeces:
+                if(dep.split(";")[0] == "venda"):
+                    for venda in lista_venda:
+                        if(venda.pessoa.cpf == dep.split(';')[1]):
+                            lista_venda.remove(venda)
 
             line_entra = []
 
@@ -247,15 +261,12 @@ def menu():
                 for line in lines:
                     print(linha_remove, line)
                     if (not line.__eq__(linha_remove)):
-                        print("entrou n igual")
                         line_entra.append(line)
 
-            open(filepath, 'w').close()
+            limpar_arquivo()
 
             for line_e in line_entra:
-                fileEscrita = open(filepath, "a+")
-                fileEscrita.write(line_e)
-                fileEscrita.close()
+                escrever(line_e)
 
             print("\nPessoa Deletada com Sucesso! \n")
 
@@ -274,14 +285,34 @@ def menu():
                 pessoa_achada = pessoa
 
         if (pessoa_achada == None):
-            print("Carro não existe!\n")
+            print("Pessoa não existe!\n")
         else:
-            print("\n\tAlterando pessoa: ", pessoa.cpf, " - ", pessoa.nome, "\n")
+
+            lines = getLines()
+            linha_remove = getLineObj('p', cpf)
+
+            print("\n\tAlterando pessoa: ", pessoa_achada.cpf, " - ", pessoa_achada.nome, "\n")
             new_nome = input("Digite o novo nome: ")
             new_idade = input("Digite a nova idade: ")
 
             pessoa_achada.nome = new_nome
             pessoa_achada.idade = new_idade
+
+            linha_add = "pessoa;" + pessoa_achada.cpf + ';' + pessoa_achada.rg + ";" + str(
+                pessoa_achada.idade) + ";" + pessoa_achada.nome
+
+            line_entra = []
+
+            for line in lines:
+                if (not linha_remove == line):
+                    line_entra.append(line)
+
+            limpar_arquivo()
+
+            for line_e in line_entra:
+                escrever(line_e)
+
+            escrever(linha_add + "\n")
 
             print("\nPessoa Alterada com sucesso!\n")
             menu()
@@ -321,25 +352,27 @@ def menu():
                     lista_venda.append(v)
                     print("\nVenda realizada com sucesso!\n")
 
-                    fileEscrita = open(filepath, "a+")
-                    fileEscrita.write(
-                        "venda;" + str(pessoa_achada.cpf) + ';' + str(carro_achado.numero_chassi) + ";" + str(
-                            v.data) + "\n")
-                    fileEscrita.close()
+                    escrever("venda;" + str(pessoa_achada.cpf) + ';' + str(carro_achado.numero_chassi) + ";" + str(
+                        v.data) + "\n")
 
                 else:
-                    print("Carro já foi vendido")
+                    print("\nCarro já foi vendido\n")
 
         menu()
 
     elif (op == 10):
 
-        print("\nLista de vendas (", lista_venda.__len__(), ")")
-        for venda in lista_venda:
-            print("\nComprador: ", venda.pessoa.cpf, " - ", venda.pessoa.nome, end="")
-            print("Carro: ", venda.carro.numero_chassi,
-                  " - ", venda.carro.nome, "\n")
-        menu()
+        if (lista_venda.__len__() > 0):
+
+            print("\nLista de vendas (", lista_venda.__len__(), ")")
+            for venda in lista_venda:
+                print("\nComprador: ", venda.pessoa.cpf, " - ", venda.pessoa.nome, "Carro: ", venda.carro.numero_chassi,
+                      " - ", venda.carro.nome, "\n")
+            menu()
+
+        else:
+            print("\nNenhuma venda encontrada!\n")
+            menu()
 
     elif (op == 11):
 
@@ -353,8 +386,41 @@ def menu():
         menu()
 
 
-def reload():
+def getLineObj(objeto, identificador):
+    linha_remove = None
+    lines = getLines()
 
+    if (objeto == 'p'):
+        for line in lines:
+            if (identificador == line.split(";")[1] and line.split(";")[0] == "pessoa"):
+                linha_remove = line
+
+    elif (objeto == 'c'):
+        for line in lines:
+            if (identificador == int(line.split(";")[1]) and line.split(";")[0] == "carro"):
+                linha_remove = line
+
+    return linha_remove
+
+
+def getLines():
+    fileLeitura = open(filepath, "r+")
+    lines = fileLeitura.readlines()
+    fileLeitura.close()
+    return lines
+
+
+def limpar_arquivo():
+    open(filepath, 'w').close()
+
+
+def escrever(texto):
+    fileEscrita = open(filepath, "a+")
+    fileEscrita.write(texto)
+    fileEscrita.close()
+
+
+def reload():
     fileLeitura = open(filepath, "r+")
     lines = fileLeitura.readlines()
     fileLeitura.close()
@@ -367,11 +433,15 @@ def reload():
             if (lines_inside[0] == "carro"):
                 c = Carro(int(lines_inside[1]), lines_inside[2], lines_inside[3], lines_inside[4], lines_inside[5],
                           float(lines_inside[6]))
+
                 lista_carros.append(c)
             elif (lines_inside[0] == "pessoa"):
                 p = Pessoa(lines_inside[1], lines_inside[2], int(lines_inside[3]), lines_inside[4])
                 lista_pessoa.append(p)
-            elif (lines_inside[0] == "venda"):
+
+        for obj in lines:
+            lines_inside = obj.split(";")
+            if (lines_inside[0] == "venda"):
 
                 pessoa_venda = None
 
