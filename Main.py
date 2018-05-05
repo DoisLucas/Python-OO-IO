@@ -17,7 +17,7 @@ lista_venda = []
 usuario = getpass.getuser()
 
 #Manual
-usuario = 'Pichau'
+#usuario = 'Seu usuario aqui'
 
 filepath = os.path.join('C:\\Users\\' + usuario + '\\Desktop\\', 'database.txt')
 
