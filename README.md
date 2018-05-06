@@ -9,5 +9,8 @@ CRUD em Python utilizando mecanismo de I/O para realizar a serialização e dess
 
 **Desserialização:** é o inverso da serialização, quando desserializados, o objeto é montado novamente de forma idêntica a sua instância original
 
+<p align="center">
 
+<img src="https://github.com/DoisLucas/Python-OO-IO/blob/master/Images/serialization.png" width="700px" height="300px"/>
 
+</p>
